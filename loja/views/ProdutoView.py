@@ -29,11 +29,13 @@ def delete_produto_view(request, id=None):
 
 def details_produto_view(request, id=None):
     produtos = Produto.objects.all()
+    Categorias = Categoria.objects.all()
+    Fabricantes = Fabricante.objects.all()
     if id is not None:
         produtos = produtos.filter(id=id)
     produto = produtos.first()
     print(produto)
-    context = {'produto': produto}
+    context = {'produto': produto, 'fabricantes' : Fabricantes, 'categorias' : Categorias}
     return render(request, template_name='produto/produto-details.html', context=context, status=200)
 
 
