@@ -20,11 +20,13 @@ def delete_produto_postback(request, id=None):
 
 def delete_produto_view(request, id=None):
     produtos = Produto.objects.all()
+    Categorias = Categoria.objects.all()
+    Fabricantes = Fabricante.objects.all()
     if id is not None:
         produtos = produtos.filter(id=id)
     produto = produtos.first()
     print(produto)
-    context = {'produto': produto}
+    context = {'produto': produto, 'fabricantes' : Fabricantes, 'categorias' : Categorias}
     return render(request, template_name='produto/produto-delete.html', context=context, status=200)
 
 def details_produto_view(request, id=None):
@@ -118,6 +120,8 @@ def create_produto_view(request, id=None):
         destaque = request.POST.get("destaque")
         promocao = request.POST.get("promocao")
         msgPromocao = request.POST.get("msgPromocao")
+        categoria_id = request.POST.get("CategoriaFk")
+        fabricante_id = request.POST.get("FabricanteFk")
         preco = request.POST.get("preco")
         image = request.POST.get("image")
         print("postback-create")
@@ -125,15 +129,25 @@ def create_produto_view(request, id=None):
         print(destaque)
         print(promocao)
         print(msgPromocao)
+        print(Categoria)
+        print(Fabricante)
         print(preco)
         print(image)
         try:
             obj_produto = Produto()
+            obj_produto = Categoria()
+            obj_produto = Fabricante()
             obj_produto.Produto = produto
+            obj_produto.Categoria = produto
+            obj_produto.Fabricante = produto
             obj_produto.destaque = (destaque is not None)
             obj_produto.promocao = (promocao is not None)
             if msgPromocao is not None:
                 obj_produto.msgPromocao = msgPromocao
+            if categoria_id:
+                obj_produto.categoria = Categoria.objects.filter(id=categoria_id).first()
+            if fabricante_id:
+                obj_produto.fabricante = Fabricante.objects.filter(id=fabricante_id).first()
             obj_produto.preco = 0
             if (preco is not None) and ( preco != ""):
                 obj_produto.preco = preco
@@ -153,4 +167,7 @@ def create_produto_view(request, id=None):
         except Exception as e:
             print("Erro inserindo produto: %s" % e)
         return redirect("/produto")
-    return render(request, template_name='produto/produto-create.html',status=200)
+    categorias = Categoria.objects.all()
+    fabricantes = Fabricante.objects.all()
+    context = {'categorias': categorias, 'fabricantes': fabricantes}
+    return render(request, template_name='produto/produto-create.html', context=context, status=200)
