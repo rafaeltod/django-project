@@ -17,3 +17,4 @@ class ProdutoAdmin(admin.ModelAdmin):
     empty_value_display = 'Vazio'
     search_fields = ('Produto',)
 admin.site.register(Produto, ProdutoAdmin)
+admin.site.register(Usuario)
