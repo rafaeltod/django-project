@@ -23,6 +23,7 @@ from django.conf.urls import include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('loja.urls.HomeUrls')),
+    path('', include('loja.urls.AuthUrls')),
     path('produto/', include('loja.urls.ProdutoUrls')),
     # Adicione a linha a seguir
     path('usuario/', include('loja.urls.UsuarioUrls')),
