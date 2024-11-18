@@ -4,6 +4,7 @@ from loja.models import Produto
 from datetime import timedelta, datetime
 from django.utils import timezone
 from django.core.files.storage import FileSystemStorage
+from django.contrib.auth.decorators import login_required
 
 def delete_produto_postback(request, id=None):
     if request.method == 'POST':
@@ -40,7 +41,7 @@ def details_produto_view(request, id=None):
     context = {'produto': produto, 'fabricantes' : Fabricantes, 'categorias' : Categorias}
     return render(request, template_name='produto/produto-details.html', context=context, status=200)
 
-
+@login_required
 def edit_produto_postback(request, id=None):
     if request.method == 'POST':
         id = request.POST.get("id")
