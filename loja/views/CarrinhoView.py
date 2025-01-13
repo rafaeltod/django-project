@@ -36,3 +36,15 @@ def create_carrinhoitem_view(request, produto_id=None):
         # Se o produto já estiver no carrinho, apenas aumenta a quantidade
         carrinho_item.quantidade += 1
         print ('item de carrinho: Acrescentou 1 item do produto ' + str(carrinho_item.id))
+    else:
+        # Se o produto não estiver no carrinho, cria um novo item no carrinho
+        carrinho_item = CarrinhoItem.objects.create(
+            carrinho=carrinho,
+            produto=produto,
+            quantidade=1,
+            preco=produto.preco
+        )
+        print ('item de carrinho: Acrescentou o produto ' + str(carrinho_item.id))
+    carrinho_item.save()
+    print ('item de carrinho salvo: ' + str(carrinho_item.id))
+    return redirect('/carrinho')
