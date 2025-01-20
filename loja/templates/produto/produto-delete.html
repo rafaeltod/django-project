@@ -7,7 +7,7 @@
 {% block content %}
 <div id="content">
     <div class="container">
-        <form method="POST" action="/produto/delete">
+        <form method="POST" action="{% url 'delete_produto_postback' %}">
             {% csrf_token %}
             <div class="row">
                 <input type="hidden" value="{{produto.id}}" name="id">
@@ -65,9 +65,10 @@
                 </select>
             </div>
             <div class="row">
-                <button type="submit" class="btn btn-danger col-md-2 mt-3 mr-2"><i class="fa
-                fa-check"></i> Excluir</button>
-                <a href="{% url 'produto' %}" class="btn bg-secondary col-md-2 mt-3"><i class="fa fa-rotate-left"></i>Retornar</a>
+                <button type="submit" class="btn btn-danger col-md-2 mt-3 mr-2"><i class="fa fa-check"></i>
+                    Excluir</button>
+                <a href="{% url 'produto' %}" class="btn bg-secondary col-md-2 mt-3"><i
+                        class="fa fa-rotate-left"></i>Retornar</a>
             </div>
         </form>
     </div>

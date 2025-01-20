@@ -16,7 +16,7 @@ def delete_produto_postback(request, id=None):
             Produto.objects.filter(id=id).delete()
             print("Produto %s excluido com sucesso" % produto)
         except Exception as e:
-            print("Erro salvando edição de produto: %s" % e)
+            print("Erro excluindo produto: %s" % e)
     return redirect("/produto")
 
 def delete_produto_view(request, id=None):
