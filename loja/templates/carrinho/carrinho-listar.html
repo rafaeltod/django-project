@@ -11,34 +11,79 @@
             <h3>Carrinho de Compras</h3>
         </div>
         <div class="row">
-            <a class="col-md-4">Produto</a> <a class="col-md-2">Quantidade</a> <a class="col-md-2">Preço</a> <a
-                class="col-md-2">Total</a>
+            <a class="col-md-4">Produto</a> <a class="col-md-2">Quantidade</a> <a class="col-md-2">Preço</a> <a class="col-md-2">Total</a>
         </div>
         {% if itens %}
         {% for item in itens %}
-        <div class="row">
+        <div class="row" id="item-{{ item.id }}">
             <a class="col-md-4"> {{ item.produto.Produto }}</a>
-            <a class="col-md-2"> {{ item.quantidade }}</a>
-            <a class="col-md-2">R$ {{ item.preco|floatformat:2 }}</a>
-            <a class="col-md-2">R$ {{ item.total }}</a>
+            <a class="col-md-2">
+                <button type="button" class="btn btn-secondary btn-decrease" data-id="{{ item.id }}">-</button>
+                <span id="quantidade-{{ item.id }}">{{ item.quantidade }}</span>
+                <button type="button" class="btn btn-secondary btn-increase" data-id="{{ item.id }}">+</button>
+            </a>
+            <a class="col-md-2">R$ <span id="preco-{{ item.id }}">{{ item.preco|floatformat:2 }}</span></a>
+            <a class="col-md-2">R$ <span id="total-{{ item.id }}">{{ item.total }}</span></a>
             <!-- Botão para excluir o item abaixo -->
             <a class="col-md-2">
-                <form method="POST" action="{% url 'remover_carrinhoitem' item.id%}" style="display:inline;"> {% csrf_token %} <button type="submit" class="btn btn-danger">Excluir</button> </form>
+                <form method="POST" action="{% url 'remover_carrinhoitem' item.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </form>
             </a>
             <!-- Botão para excluir o item acima -->
         </div>
         {% endfor %}
-        <h5 class="mt-4">Total: R$ {{ carrinho.total|floatformat:2 }}</h3>
-            <div class="mt-4">
-                <a href="{% url 'home' %}" class="btn btn-secondary">Voltar à loja</a>
-                <a href="{% url 'confirmar_carrinho' %}" class="btn btn-success">Finalizar Compra</a>
-            </div>
-            {% else %}
-            <div class="alert alert-warning mt-4" role="alert">
-                Seu carrinho está vazio.
-            </div>
-            <a href="{% url 'home' %}" class="btn btn-primary mt-3">Ir à loja</a>
-            {% endif %}
+        <h5 class="mt-4">Total: R$ <span id="carrinho-total">{{ carrinho.total|floatformat:2 }}</span></h5>
+        <div class="mt-4">
+            <a href="{% url 'home' %}" class="btn btn-secondary">Voltar à loja</a>
+            <a href="{% url 'confirmar_carrinho' %}" class="btn btn-success">Finalizar Compra</a>
+        </div>
+        {% else %}
+        <div class="alert alert-warning mt-4" role="alert">
+            Seu carrinho está vazio.
+        </div>
+        <a href="{% url 'home' %}" class="btn btn-primary mt-3">Ir à loja</a>
+        {% endif %}
     </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'js/home.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-increase').forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.getAttribute('data-id');
+            updateQuantity(itemId, 'aumentar');
+        });
+    });
+
+    document.querySelectorAll('.btn-decrease').forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.getAttribute('data-id');
+            updateQuantity(itemId, 'diminuir');
+        });
+    });
+
+    function updateQuantity(itemId, action) {
+        fetch(`/carrinho/${action}/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ item_id: itemId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById(`quantidade-${itemId}`).innerText = data.quantidade;
+                document.getElementById(`total-${itemId}`).innerText = data.total;
+                document.getElementById('carrinho-total').innerText = data.carrinho_total;
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

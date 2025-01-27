@@ -4,6 +4,8 @@ from datetime import datetime
 # Acrescente essa referência
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+from django.http import JsonResponse
+
 # Função para adicionar um item ao carrinho
 def create_carrinhoitem_view(request, produto_id=None):
     print ('create_carrinhoitem_view')
@@ -54,20 +56,20 @@ def create_carrinhoitem_view(request, produto_id=None):
 
 # Acrescente a função para exibir os itens do carrinho
 def list_carrinho_view(request):
-    print ('list_carrinho_view')
+    print('list_carrinho_view')
     carrinho = None
+    carrinho_item = None
     # Tenta pegar o carrinho da sessão ou cria um novo carrinho
     carrinho_id = request.session.get('carrinho_id')
     if carrinho_id:
-        print ('carrinho: ' + str(carrinho_id))
+        print('carrinho: ' + str(carrinho_id))
         # Obtém o carrinho do usuário
         carrinho = Carrinho.objects.filter(id=carrinho_id).first()
-        print ('Data do carrinho' + str(carrinho.criado_em) )
-        carrinho_item = None
+        print('Data do carrinho' + str(carrinho.criado_em))
         # Verifica se o produto já existe no carrinho do usuário
         carrinho_item = CarrinhoItem.objects.filter(carrinho_id=carrinho_id)
         if carrinho_item:
-            print ('itens de carrinho encontrado: ' + str(carrinho_item))
+            print('itens de carrinho encontrado: ' + str(carrinho_item))
     context = {
         'carrinho': carrinho,
         'itens': carrinho_item
@@ -76,27 +78,56 @@ def list_carrinho_view(request):
 
 @login_required
 def confirmar_carrinho_view(request):
-    print ('confirmar_carrinho_view')
+    print('confirmar_carrinho_view')
     carrinho = None
     # Tenta pegar o carrinho da sessão ou cria um novo carrinho
     carrinho_id = request.session.get('carrinho_id')
     if carrinho_id:
-        print ('carrinho: ' + str(carrinho_id))
+        print('carrinho: ' + str(carrinho_id))
         # Obtém o carrinho do usuário
         carrinho = Carrinho.objects.filter(id=carrinho_id).first()
         # Obtém o usuário
         usuario = get_object_or_404(Usuario, user=request.user)
-        print ('Usuario: ' + str(usuario))
+        print('Usuario: ' + str(usuario))
         if usuario:
             carrinho.user_id = usuario.id
             carrinho.situacao = 1
             carrinho.confirmado_em = timezone.make_aware(datetime.today())
             carrinho.save()
-            print ('carrinho salvo')
+            print('carrinho salvo')
+            # Remove o carrinho da sessão
+            del request.session['carrinho_id']
     context = {
-    'carrinho': carrinho
+        'carrinho': carrinho
     }
     return render(request, 'carrinho/carrinho-confirmado.html', context=context)
+
+def aumentar_quantidade(request, id):
+    item = get_object_or_404(CarrinhoItem, id=id)
+    item.quantidade += 1
+    item.save()
+    carrinho = item.carrinho
+    carrinho_total = sum(i.total for i in carrinho.itens.all())
+    return JsonResponse({
+        'success': True,
+        'quantidade': item.quantidade,
+        'total': item.total,
+        'carrinho_total': carrinho_total
+    })
+
+def diminuir_quantidade(request, id):
+    item = get_object_or_404(CarrinhoItem, id=id)
+    if item.quantidade > 1:
+        item.quantidade -= 1
+        item.save()
+    carrinho = item.carrinho
+    carrinho_total = sum(i.total for i in carrinho.itens.all())
+    return JsonResponse({
+        'success': True,
+        'quantidade': item.quantidade,
+        'total': item.total,
+        'carrinho_total': carrinho_total
+    })
 
 # Função para excluir um item do carrinho
 def remover_item_view(request, item_id):
