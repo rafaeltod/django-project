@@ -2,7 +2,8 @@
 {% load static %}
 {% block title %}{{ title }}{% endblock %}
 {% block styles %}
-<link rel="stylesheet" href="{% static 'css/home.css' %}">{% endblock %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
 {% block content %}
 <div id="content">
     <div class="container-fluid">
@@ -23,6 +24,7 @@
                 </div>
                 {% endfor %}
                 <a href="{{link_href}}" style="display: block; text-align: center; margin-bottom:20px;">{{link_text}}</a>
+                <a href="{% url 'password_reset' %}" class="text-center mt-2 mb-2" style="display: block;">Esqueci minha senha</a>
                 <button type="submit" class="btn btn-primary">{{button_text}}</button>
             </form>
         </div>

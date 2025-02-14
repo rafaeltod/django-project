@@ -1,6 +1,18 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from loja.models.Usuario import Usuario
 from loja.forms.AuthForm import LoginForm, RegisterForm
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.conf import settings
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+import hashlib
+import logging
+
+logger = logging.getLogger(__name__)
 
 def logout_view(request):
     logout(request)
